@@ -1,136 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KenzoVerse Calc</title>
-  <style>
-    :root {
-      --bg: #111;
-      --text: #FFE6E6;
-      --accent: #FF3838;
-      --accent-2: #FF5C5C;
-      --shadow: 0 0 15px rgba(255,56,56,0.5);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KenzoVerse Calculator</title>
+<style>
+  :root {
+    --bg: #1a1a1a;
+    --btn-bg: #333;
+    --btn-hover: #ff3838;
+    --text: #fff;
+    --accent: #ff3838;
+  }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
 
-    body {
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
+  .calculator {
+    background: #222;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(255,56,56,0.5);
+    width: 300px;
+  }
 
-    .calculator {
-      background: #222;
-      padding: 30px 25px;
-      border-radius: 16px;
-      box-shadow: 0 0 30px rgba(255, 56, 56, 0.4);
-      text-align: center;
-      width: 300px;
-    }
+  .display {
+    background: #111;
+    color: var(--text);
+    font-size: 2rem;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: right;
+    margin-bottom: 15px;
+    overflow-x: auto;
+  }
 
-    .display {
-      width: 100%;
-      height: 60px;
-      font-size: 28px;
-      margin-bottom: 20px;
-      text-align: right;
-      padding-right: 15px;
-      border-radius: 10px;
-      border: none;
-      background: #111;
-      color: var(--text);
-      box-shadow: inset 0 0 10px rgba(255,56,56,0.3);
-    }
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
 
-    .buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
-    }
+  button {
+    padding: 20px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--btn-bg);
+    color: var(--text);
+    cursor: pointer;
+    transition: 0.2s;
+  }
 
-    .buttons button {
-      padding: 18px;
-      font-size: 20px;
-      border: none;
-      border-radius: 10px;
-      background: #333;
-      color: var(--text);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: var(--shadow);
-      text-transform: uppercase;
-      font-weight: 600;
-    }
+  button:hover {
+    background: var(--btn-hover);
+    color: #fff;
+  }
 
-    .buttons button:hover {
-      background: var(--accent);
-      box-shadow: 0 0 20px var(--accent), 0 0 30px var(--accent-2);
-      transform: scale(1.1);
-    }
+  .operator {
+    background: var(--accent);
+  }
 
-    .buttons button[data-op="="] {
-      background: var(--accent-2);
-      grid-column: span 2;
-    }
+  .operator:hover {
+    background: #ff5c5c;
+  }
 
-    .buttons button[data-op="="]:hover {
-      background: var(--accent);
-    }
-  </style>
+  .span-two {
+    grid-column: span 2;
+  }
+</style>
 </head>
 <body>
   <div class="calculator">
-    <input type="text" class="display" disabled placeholder="0">
+    <div class="display" id="display">0</div>
     <div class="buttons">
-      <button data-num="7">7</button>
-      <button data-num="8">8</button>
-      <button data-num="9">9</button>
-      <button data-op="/">/</button>
-      <button data-num="4">4</button>
-      <button data-num="5">5</button>
-      <button data-num="6">6</button>
-      <button data-op="*">*</button>
-      <button data-num="1">1</button>
-      <button data-num="2">2</button>
-      <button data-num="3">3</button>
-      <button data-op="-">-</button>
-      <button data-num="0">0</button>
-      <button data-op=".">.</button>
-      <button data-op="=">=</button>
-      <button data-op="+">+</button>
+      <button class="operator" id="clear">C</button>
+      <button class="operator" id="divide">/</button>
+      <button class="operator" id="multiply">*</button>
+      <button class="operator" id="subtract">-</button>
+
+      <button class="num">7</button>
+      <button class="num">8</button>
+      <button class="num">9</button>
+      <button class="operator" id="add">+</button>
+
+      <button class="num">4</button>
+      <button class="num">5</button>
+      <button class="num">6</button>
+      <button class="operator" id="equals">=</button>
+
+      <button class="num">1</button>
+      <button class="num">2</button>
+      <button class="num">3</button>
+      <button class="num span-two">0</button>
+      <button class="num">.</button>
     </div>
   </div>
 
-  <script>
-    const display = document.querySelector('.display');
-    const buttons = document.querySelectorAll('.buttons button');
-    let currentInput = '';
-
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const num = btn.dataset.num;
-        const op = btn.dataset.op;
-
-        if(num !== undefined){
-          currentInput += num;
-        }
-        if(op !== undefined){
-          if(op === '='){
-            try { currentInput = eval(currentInput); } 
-            catch { currentInput = 'Error'; }
-          } else {
-            currentInput += op;
-          }
-        }
-        display.value = currentInput;
-      });
+<script>
+  const display = document.getElementById('display');
+  let current = '';
+  let result = '';
+  
+  const numbers = document.querySelectorAll('.num');
+  const operators = document.querySelectorAll('.operator');
+  
+  numbers.forEach(num => {
+    num.addEventListener('click', () => {
+      if (current === '0' && num.textContent !== '.') current = '';
+      current += num.textContent;
+      display.textContent = current;
     });
-  </script>
+  });
+
+  document.getElementById('clear').addEventListener('click', () => {
+    current = '';
+    result = '';
+    display.textContent = '0';
+  });
+
+  document.getElementById('add').addEventListener('click', () => appendOperator('+'));
+  document.getElementById('subtract').addEventListener('click', () => appendOperator('-'));
+  document.getElementById('multiply').addEventListener('click', () => appendOperator('*'));
+  document.getElementById('divide').addEventListener('click', () => appendOperator('/'));
+
+  function appendOperator(op) {
+    if (current === '' && result !== '') current = result;
+    if (current.slice(-1).match(/[\+\-\*\/]/)) {
+      current = current.slice(0, -1);
+    }
+    current += op;
+    display.textContent = current;
+  }
+
+  document.getElementById('equals').addEventListener('click', () => {
+    try {
+      result = eval(current);
+      display.textContent = result;
+      current = '';
+    } catch {
+      display.textContent = 'Error';
+      current = '';
+    }
+  });
+</script>
 </body>
 </html>
