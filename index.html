@@ -161,20 +161,38 @@ buttons.forEach(btn => {
   btn.addEventListener('click', () => {
     const val = btn.dataset.value;
 
+    const operators = ['+', '-', '×', '÷', '%'];
+
     if(val === 'C') {
       current = '';
     } else if(val === '⌫') {
       current = current.slice(0, -1);
     } else if(val === '=') {
+      if(current === '') return;
+
+      // Hapus operator terakhir jika ada
+      let lastChar = current.slice(-1);
+      if(operators.includes(lastChar)) current = current.slice(0, -1);
+
       try {
-        const result = eval(current.replace(/×/g,'*').replace(/÷/g,'/').replace(/%/g,'/100'));
+        // Ganti simbol dengan JS operator
+        const sanitized = current
+          .replace(/×/g,'*')
+          .replace(/÷/g,'/')
+          .replace(/%/g,'/100');
+        const result = eval(sanitized);
         addHistory(`${current} = ${result}`);
         current = result;
       } catch {
         current = 'Error';
       }
     } else {
-      current += val;
+      // Ganti operator terakhir jika user menekan operator berturut-turut
+      if(operators.includes(val) && operators.includes(current.slice(-1))) {
+        current = current.slice(0, -1) + val;
+      } else {
+        current += val;
+      }
     }
 
     updateDisplay();
