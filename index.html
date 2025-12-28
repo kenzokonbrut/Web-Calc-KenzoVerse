@@ -3,154 +3,216 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KenzoVerse Calculator</title>
+<title>KenzoVerse Smart Calculator</title>
 <style>
-  :root {
-    --bg: #1a1a1a;
-    --btn-bg: #333;
-    --btn-hover: #ff3838;
-    --text: #fff;
-    --accent: #ff3838;
-  }
+:root {
+  --bg: #0f0f0f;
+  --display-bg: #1b1b1b;
+  --btn-bg: #222;
+  --btn-hover: #ff3838;
+  --btn-active: #ff5c5c;
+  --text: #fff;
+  --accent: #ff3838;
+  --shadow: 0 0 20px rgba(255,56,56,0.5);
+}
 
-  body {
-    font-family: Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-  }
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
 
+.calculator {
+  background: #111;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  width: 320px;
+}
+
+.history {
+  font-size: 0.9rem;
+  min-height: 25px;
+  color: var(--accent);
+  text-align: right;
+  margin-bottom: 5px;
+  opacity: 0.7;
+  overflow-x: auto;
+}
+
+.display {
+  background: var(--display-bg);
+  color: var(--text);
+  font-size: 2.2rem;
+  padding: 15px;
+  border-radius: 12px;
+  text-align: right;
+  margin-bottom: 15px;
+  overflow-x: auto;
+  box-shadow: inset 0 0 10px rgba(255, 56, 56, 0.3);
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+button {
+  padding: 20px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 12px;
+  background: var(--btn-bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow);
+}
+
+button:hover {
+  background: var(--btn-hover);
+  transform: scale(1.05);
+}
+
+button:active {
+  background: var(--btn-active);
+  transform: scale(0.95);
+  box-shadow: 0 0 10px rgba(255,56,56,0.8);
+}
+
+.operator {
+  background: var(--accent);
+}
+
+.operator:hover {
+  background: #ff5c5c;
+}
+
+.span-two {
+  grid-column: span 2;
+}
+
+@media(max-width: 400px) {
   .calculator {
-    background: #222;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 0 20px rgba(255,56,56,0.5);
-    width: 300px;
+    width: 90%;
+    padding: 15px;
   }
-
   .display {
-    background: #111;
-    color: var(--text);
-    font-size: 2rem;
+    font-size: 1.8rem;
     padding: 10px;
-    border-radius: 8px;
-    text-align: right;
-    margin-bottom: 15px;
-    overflow-x: auto;
   }
-
-  .buttons {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-  }
-
   button {
-    padding: 20px;
-    font-size: 1.2rem;
-    border: none;
-    border-radius: 8px;
-    background: var(--btn-bg);
-    color: var(--text);
-    cursor: pointer;
-    transition: 0.2s;
+    padding: 15px;
+    font-size: 1rem;
   }
-
-  button:hover {
-    background: var(--btn-hover);
-    color: #fff;
-  }
-
-  .operator {
-    background: var(--accent);
-  }
-
-  .operator:hover {
-    background: #ff5c5c;
-  }
-
-  .span-two {
-    grid-column: span 2;
-  }
+}
 </style>
 </head>
 <body>
   <div class="calculator">
+    <div class="history" id="history"></div>
     <div class="display" id="display">0</div>
     <div class="buttons">
       <button class="operator" id="clear">C</button>
+      <button class="operator" id="delete">⌫</button>
       <button class="operator" id="divide">/</button>
       <button class="operator" id="multiply">*</button>
-      <button class="operator" id="subtract">-</button>
 
       <button class="num">7</button>
       <button class="num">8</button>
       <button class="num">9</button>
-      <button class="operator" id="add">+</button>
+      <button class="operator" id="subtract">-</button>
 
       <button class="num">4</button>
       <button class="num">5</button>
       <button class="num">6</button>
-      <button class="operator" id="equals">=</button>
+      <button class="operator" id="add">+</button>
 
       <button class="num">1</button>
       <button class="num">2</button>
       <button class="num">3</button>
       <button class="num span-two">0</button>
       <button class="num">.</button>
+      <button class="operator" id="equals">=</button>
     </div>
   </div>
 
 <script>
-  const display = document.getElementById('display');
-  let current = '';
-  let result = '';
-  
-  const numbers = document.querySelectorAll('.num');
-  const operators = document.querySelectorAll('.operator');
-  
-  numbers.forEach(num => {
-    num.addEventListener('click', () => {
-      if (current === '0' && num.textContent !== '.') current = '';
-      current += num.textContent;
-      display.textContent = current;
-    });
-  });
+const display = document.getElementById('display');
+const historyEl = document.getElementById('history');
+let current = '';
+let result = '';
 
-  document.getElementById('clear').addEventListener('click', () => {
-    current = '';
-    result = '';
-    display.textContent = '0';
-  });
+const numbers = document.querySelectorAll('.num');
+const operators = document.querySelectorAll('.operator');
 
-  document.getElementById('add').addEventListener('click', () => appendOperator('+'));
-  document.getElementById('subtract').addEventListener('click', () => appendOperator('-'));
-  document.getElementById('multiply').addEventListener('click', () => appendOperator('*'));
-  document.getElementById('divide').addEventListener('click', () => appendOperator('/'));
-
-  function appendOperator(op) {
-    if (current === '' && result !== '') current = result;
-    if (current.slice(-1).match(/[\+\-\*\/]/)) {
-      current = current.slice(0, -1);
-    }
-    current += op;
+numbers.forEach(num => {
+  num.addEventListener('click', () => {
+    if (current === '0' && num.textContent !== '.') current = '';
+    current += num.textContent;
     display.textContent = current;
-  }
-
-  document.getElementById('equals').addEventListener('click', () => {
-    try {
-      result = eval(current);
-      display.textContent = result;
-      current = '';
-    } catch {
-      display.textContent = 'Error';
-      current = '';
-    }
   });
+});
+
+document.getElementById('clear').addEventListener('click', () => {
+  current = '';
+  result = '';
+  display.textContent = '0';
+  historyEl.textContent = '';
+});
+
+document.getElementById('delete').addEventListener('click', () => {
+  current = current.slice(0, -1);
+  display.textContent = current || '0';
+});
+
+document.getElementById('add').addEventListener('click', () => appendOperator('+'));
+document.getElementById('subtract').addEventListener('click', () => appendOperator('-'));
+document.getElementById('multiply').addEventListener('click', () => appendOperator('*'));
+document.getElementById('divide').addEventListener('click', () => appendOperator('/'));
+
+function appendOperator(op) {
+  if (current === '' && result !== '') current = result;
+  if (current.slice(-1).match(/[\+\-\*\/]/)) {
+    current = current.slice(0, -1);
+  }
+  current += op;
+  display.textContent = current;
+}
+
+document.getElementById('equals').addEventListener('click', () => {
+  try {
+    result = eval(current);
+    historyEl.textContent = current + ' =';
+    display.textContent = result;
+    current = '';
+  } catch {
+    display.textContent = 'Error';
+    current = '';
+  }
+});
+
+// Keyboard support
+document.addEventListener('keydown', (e) => {
+  if (!isNaN(e.key) || e.key === '.') {
+    current += e.key;
+    display.textContent = current;
+  } else if (['+', '-', '*', '/'].includes(e.key)) {
+    appendOperator(e.key);
+  } else if (e.key === 'Enter') {
+    document.getElementById('equals').click();
+  } else if (e.key === 'Backspace') {
+    document.getElementById('delete').click();
+  } else if (e.key.toLowerCase() === 'c') {
+    document.getElementById('clear').click();
+  }
+});
 </script>
 </body>
 </html>
