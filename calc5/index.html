@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KenzoVerse Ultimate Scientific Calculator</title>
+
+<!-- Inter Font with Tabular Numpad Support -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg-app: #090a0f;
+  --bg-card: rgba(18, 20, 29, 0.85);
+  --bg-display: rgba(10, 12, 18, 0.95);
+  
+  --border-card: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.18);
+  
+  --btn-num: #161922;
+  --btn-num-hover: #222736;
+  --btn-sci: #1c202d;
+  --btn-sci-hover: #282e40;
+  --btn-mem: #12151e;
+  --btn-mem-hover: #1e2230;
+  --btn-func: #2a2f42;
+  --btn-func-hover: #373e56;
+  --btn-op: #2563eb;
+  --btn-op-hover: #1d4ed8;
+  
+  --text-main: #f8fafc;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+  --accent-blue: #38bdf8;
+  --accent-amber: #fbbf24;
+  
+  --radius-app: 24px;
+  --radius-btn: 10px;
+  --shadow-app: 0 30px 60px -12px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  background-color: var(--bg-app);
+  background-image: 
+    radial-gradient(circle at 50% -10%, rgba(37, 99, 235, 0.15), transparent 50%),
+    radial-gradient(circle at 90% 90%, rgba(56, 189, 248, 0.05), transparent 40%);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 16px;
+}
+
+/* Navbar */
+.navbar {
+  width: 100%;
+  max-width: 1020px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 99px;
+  backdrop-filter: blur(20px);
+  margin-bottom: 24px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+
+.brand-badge {
+  width: 10px;
+  height: 10px;
+  background: var(--accent-blue);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--accent-blue);
+}
+
+.tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--accent-blue);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: var(--btn-num);
+  border: 1px solid var(--border-card);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.status-pill:hover {
+  border-color: var(--border-hover);
+  color: var(--text-main);
+}
+
+.status-pill.active {
+  color: var(--accent-amber);
+  border-color: rgba(251, 191, 36, 0.3);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+/* Main Layout */
+.app-container {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  max-width: 1020px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* Calculator Unit */
+.calculator {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-app);
+  padding: 28px;
+  width: 100%;
+  max-width: 620px;
+  box-shadow: var(--shadow-app);
+  backdrop-filter: blur(24px);
+}
+
+/* Display Unit */
+.display-wrapper {
+  background: var(--bg-display);
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: border-color 0.2s;
+  position: relative;
+}
+
+.display-wrapper:hover {
+  border-color: var(--border-hover);
+}
+
+.display-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.indicators {
+  display: flex;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.ind {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+}
+
+.ind.active {
+  color: var(--accent-blue);
+  background: rgba(56, 189, 248, 0.15);
+}
+
+.sub-display {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  min-height: 1.4rem;
+  text-align: right;
+  word-break: break-all;
+  font-variant-numeric: tabular-nums;
+}
+
+.main-display-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 6px;
+}
+
+.main-display {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 2.4rem;
+  font-weight: 500;
+  text-align: right;
+  width: 100%;
+  color: var(--text-main);
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.main-display::-webkit-scrollbar { display: none; }
+
+.action-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.action-btn:hover {
+  color: var(--text-main);
+  background: rgba(255,255,255,0.05);
+}
+
+/* Keypad Matrix (6 Columns) */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+button.key {
+  padding: 14px 0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-radius: var(--radius-btn);
+  background: var(--btn-num);
+  color: var(--text-main);
+  cursor: pointer;
+  outline: none;
+  transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+}
+
+button.key:hover {
+  background: var(--btn-num-hover);
+  border-color: var(--border-card);
+}
+
+button.key:active, button.key.active {
+  transform: scale(0.95);
+}
+
+button.mem {
+  background: var(--btn-mem);
+  color: var(--accent-amber);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+button.mem:hover { background: var(--btn-mem-hover); }
+
+button.sci {
+  background: var(--btn-sci);
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+button.sci:hover { background: var(--btn-sci-hover); color: var(--text-main); }
+
+button.func {
+  background: var(--btn-func);
+  color: #f1f5f9;
+}
+button.func:hover { background: var(--btn-func-hover); }
+
+button.operator {
+  background: var(--btn-op);
+  color: #ffffff;
+  font-weight: 600;
+}
+button.operator:hover { background: var(--btn-op-hover); }
+
+button.equals {
+  background: var(--accent-blue);
+  color: #090a0f;
+  font-weight: 700;
+}
+button.equals:hover { background: #0284c7; color: #ffffff; }
+
+/* History Panel */
+.history-panel {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-app);
+  padding: 24px;
+  height: 570px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-app);
+  backdrop-filter: blur(24px);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-card);
+  margin-bottom: 14px;
+}
+
+.history-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.clear-btn:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.history-list {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-list::-webkit-scrollbar { width: 4px; }
+.history-list::-webkit-scrollbar-thumb {
+  background: var(--border-card);
+  border-radius: 4px;
+}
+
+.history-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid transparent;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.history-item:hover {
+  background: var(--btn-num);
+  border-color: var(--border-card);
+}
+
+.history-expr {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.history-res {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums;
+}
+
+.empty-state {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #1e293b;
+  border: 1px solid var(--border-hover);
+  color: var(--text-main);
+  padding: 10px 20px;
+  border-radius: 99px;
+  font-size: 0.85rem;
+  box-shadow: 0 20px 30px rgba(0,0,0,0.6);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+footer {
+  margin-top: 30px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .app-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  .history-panel {
+    width: 100%;
+    max-width: 620px;
+    height: 220px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation Header -->
+<nav class="navbar">
+  <div class="brand">
+    <div class="brand-badge"></div>
+    <span>KenzoVerse</span>
+    <span class="tag">ULTIMATE PRO</span>
+  </div>
+  <div class="status-bar">
+    <div class="status-pill" id="angle-toggle" title="Klik untuk switch DEG/RAD Mode">DEG</div>
+    <div class="status-pill" id="mem-indicator" title="Status Memori">M: 0</div>
+  </div>
+</nav>
+
+<!-- Main App Section -->
+<div class="app-container">
+  
+  <main class="calculator">
+    <!-- Interactive Display -->
+    <div class="display-wrapper">
+      <div class="display-header">
+        <div class="indicators">
+          <span class="ind active" id="ind-deg">DEG</span>
+          <span class="ind" id="ind-rad">RAD</span>
+          <span class="ind" id="ind-mem">MEM</span>
+        </div>
+        <div class="sub-display" id="sub-display"></div>
+      </div>
+      <div class="main-display-container">
+        <button class="action-btn" id="copy-btn" title="Salin Hasil">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+        </button>
+        <div class="main-display" id="display">0</div>
+      </div>
+    </div>
+
+    <!-- 6-Column Scientific Grid Layout -->
+    <div class="keypad">
+      <!-- Memory Row -->
+      <button class="key mem" data-value="MC">MC</button>
+      <button class="key mem" data-value="MR">MR</button>
+      <button class="key mem" data-value="M+">M+</button>
+      <button class="key mem" data-value="M-">M-</button>
+      <button class="key mem" data-value="MS">MS</button>
+      <button class="key func" data-key="Escape" data-value="C">C</button>
+
+      <!-- Advanced Sci Row 1 -->
+      <button class="key sci" data-value="sin">sin</button>
+      <button class="key sci" data-value="cos">cos</button>
+      <button class="key sci" data-value="tan">tan</button>
+      <button class="key sci" data-value="!">x!</button>
+      <button class="key sci" data-value="1/">1/x</button>
+      <button class="key func" data-key="Backspace" data-value="⌫">⌫</button>
+
+      <!-- Advanced Sci Row 2 -->
+      <button class="key sci" data-value="√(">√</button>
+      <button class="key sci" data-value="^">xʸ</button>
+      <button class="key sci" data-value="²">x²</button>
+      <button class="key sci" data-value="abs(">|x|</button>
+      <button class="key sci" data-value="π">π</button>
+      <button class="key operator" data-key="/" data-value="÷">÷</button>
+
+      <!-- Advanced Sci Row 3 -->
+      <button class="key sci" data-value="log(">log</button>
+      <button class="key sci" data-value="ln(">ln</button>
+      <button class="key sci" data-value="(">(</button>
+      <button class="key sci" data-value=")">)</button>
+      <button class="key sci" data-value="e">e</button>
+      <button class="key operator" data-key="*" data-value="×">×</button>
+
+      <!-- Numpad Row 1 -->
+      <button class="key" data-key="7" data-value="7">7</button>
+      <button class="key" data-key="8" data-value="8">8</button>
+      <button class="key" data-key="9" data-value="9">9</button>
+      <button class="key sci" data-key="%" data-value="%">%</button>
+      <button class="key sci" data-value="exp">EXP</button>
+      <button class="key operator" data-key="-" data-value="-">-</button>
+
+      <!-- Numpad Row 2 -->
+      <button class="key" data-key="4" data-value="4">4</button>
+      <button class="key" data-key="5" data-value="5">5</button>
+      <button class="key" data-key="6" data-value="6">6</button>
+      <button class="key" data-key="1" data-value="1">1</button>
+      <button class="key" data-key="2" data-value="2">2</button>
+      <button class="key operator" data-key="+" data-value="+">+</button>
+
+      <!-- Numpad Row 3 -->
+      <button class="key" data-key="3" data-value="3">3</button>
+      <button class="key" data-key="0" data-value="0">0</button>
+      <button class="key" data-key="." data-value=".">.</button>
+      <button class="key equals" style="grid-column: span 3;" data-key="Enter" data-value="=">=</button>
+    </div>
+  </main>
+
+  <!-- Sidebar History -->
+  <aside class="history-panel">
+    <div class="history-header">
+      <span class="history-title">Riwayat Kalkulasi</span>
+      <button class="clear-btn" id="clear-history">Hapus</button>
+    </div>
+    <div class="history-list" id="history-list"></div>
+  </aside>
+
+</div>
+
+<div class="toast" id="toast">Notifikasi</div>
+
+<footer>
+  &copy; 2026 KenzoVerse. Engineered for high-precision scientific computing.
+</footer>
+
+<script>
+// State Management
+let current = '';
+let lastExpression = '';
+let memory = parseFloat(localStorage.getItem('kenzo_calc_mem')) || 0;
+let isDeg = true;
+let history = JSON.parse(localStorage.getItem('kenzo_calc_ult_history')) || [];
+
+// DOM Elements
+const display = document.getElementById('display');
+const subDisplay = document.getElementById('sub-display');
+const keys = document.querySelectorAll('.key');
+const historyList = document.getElementById('history-list');
+const clearHistoryBtn = document.getElementById('clear-history');
+const copyBtn = document.getElementById('copy-btn');
+const toast = document.getElementById('toast');
+const angleToggle = document.getElementById('angle-toggle');
+const memIndicator = document.getElementById('mem-indicator');
+const indDeg = document.getElementById('ind-deg');
+const indRad = document.getElementById('ind-rad');
+const indMem = document.getElementById('ind-mem');
+
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function updateUI() {
+  display.textContent = current || '0';
+  subDisplay.textContent = lastExpression;
+  
+  // Update Memory Indicators
+  memIndicator.textContent = `M: ${memory}`;
+  if (memory !== 0) {
+    indMem.classList.add('active');
+  } else {
+    indMem.classList.remove('active');
+  }
+
+  // Update Angle Mode Indicators
+  if (isDeg) {
+    angleToggle.textContent = 'DEG';
+    indDeg.classList.add('active');
+    indRad.classList.remove('active');
+  } else {
+    angleToggle.textContent = 'RAD';
+    indRad.classList.add('active');
+    indDeg.classList.remove('active');
+  }
+}
+
+// Memory Operations
+function handleMemory(op) {
+  let val = parseFloat(current) || 0;
+  switch (op) {
+    case 'MC':
+      memory = 0;
+      showToast('Memori Dibersihkan');
+      break;
+    case 'MR':
+      current = String(memory);
+      showToast(`Dimuat dari memori: ${memory}`);
+      break;
+    case 'M+':
+      memory += val;
+      showToast(`Memori: ${memory}`);
+      break;
+    case 'M-':
+      memory -= val;
+      showToast(`Memori: ${memory}`);
+      break;
+    case 'MS':
+      memory = val;
+      showToast(`Disimpan ke memori: ${memory}`);
+      break;
+  }
+  localStorage.setItem('kenzo_calc_mem', memory);
+  updateUI();
+}
+
+// Math Utility Functions
+function factorial(n) {
+  if (n < 0) return NaN;
+  if (n === 0 || n === 1) return 1;
+  let res = 1;
+  for (let i = 2; i <= n; i++) res *= i;
+  return res;
+}
+
+function calculateScientific(expr) {
+  let s = expr;
+
+  s = s.replace(/×/g, '*').replace(/÷/g, '/').replace(/%/g, '/100');
+  s = s.replace(/π/g, 'Math.PI').replace(/e/g, 'Math.E');
+  s = s.replace(/²/g, '**2').replace(/\^/g, '**');
+  s = s.replace(/√\(/g, 'Math.sqrt(');
+  s = s.replace(/log\(/g, 'Math.log10(');
+  s = s.replace(/ln\(/g, 'Math.log(');
+  s = s.replace(/abs\(/g, 'Math.abs(');
+  s = s.replace(/exp/g, '*10**');
+
+  // Handle Factorial n!
+  s = s.replace(/(\d+)!/g, (match, number) => `factorial(${number})`);
+
+  // Handle Degree / Radian Trigonometry
+  const rad = isDeg ? '(Math.PI/180)*' : '';
+  s = s.replace(/sin\(/g, `Math.sin(${rad}`);
+  s = s.replace(/cos\(/g, `Math.cos(${rad}`);
+  s = s.replace(/tan\(/g, `Math.tan(${rad}`);
+
+  let res = Function('factorial', `'use strict'; return (${s})`)(factorial);
+  
+  if (Number.isFinite(res)) {
+    return Math.round((res + Number.EPSILON) * 100000000) / 100000000;
+  }
+  return 'Error';
+}
+
+function addHistory(expr, result) {
+  history.unshift({ expr, result });
+  if (history.length > 20) history.pop();
+  localStorage.setItem('kenzo_calc_ult_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  if (history.length === 0) {
+    historyList.innerHTML = '<div class="empty-state">Belum ada riwayat</div>';
+    return;
+  }
+  
+  historyList.innerHTML = history.map((item, idx) => `
+    <div class="history-item" data-index="${idx}">
+      <span class="history-expr">${item.expr} =</span>
+      <span class="history-res">${item.result}</span>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.history-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = el.dataset.index;
+      current = String(history[idx].result);
+      updateUI();
+      showToast('Angka dimuat ke kalkulator');
+    });
+  });
+}
+
+function handleInput(val) {
+  const operators = ['+', '-', '×', '÷', '^', '%'];
+
+  if (['MC', 'MR', 'M+', 'M-', 'MS'].includes(val)) {
+    handleMemory(val);
+    return;
+  }
+
+  if (val === 'C') {
+    current = '';
+    lastExpression = '';
+  } else if (val === '⌫') {
+    current = current.toString().slice(0, -1);
+  } else if (val === '1/') {
+    if (current) current = `1/(${current})`;
+  } else if (val === '=') {
+    if (!current) return;
+    try {
+      let result = calculateScientific(current);
+      lastExpression = `${current} =`;
+      addHistory(current, result);
+      current = String(result);
+    } catch {
+      current = 'Error';
+    }
+  } else if (['sin', 'cos', 'tan', 'abs'].includes(val)) {
+    if (current === 'Error') current = '';
+    current += `${val}(`;
+  } else {
+    if (current === 'Error') current = '';
+    if (operators.includes(val) && operators.includes(current.slice(-1))) {
+      current = current.slice(0, -1) + val;
+    } else {
+      current += val;
+    }
+  }
+  updateUI();
+}
+
+// Events
+keys.forEach(key => {
+  key.addEventListener('click', () => handleInput(key.dataset.value));
+});
+
+window.addEventListener('keydown', (e) => {
+  let keyVal = e.key;
+  if (keyVal === 'Enter') e.preventDefault();
+
+  let targetBtn = Array.from(keys).find(k => k.dataset.key === keyVal);
+  if (targetBtn) {
+    targetBtn.classList.add('active');
+    setTimeout(() => targetBtn.classList.remove('active'), 120);
+    handleInput(targetBtn.dataset.value);
+  }
+});
+
+angleToggle.addEventListener('click', () => {
+  isDeg = !isDeg;
+  showToast(`Mode diubah ke ${isDeg ? 'DEG (Derajat)' : 'RAD (Radian)'}`);
+  updateUI();
+});
+
+copyBtn.addEventListener('click', () => {
+  if (display.textContent && display.textContent !== 'Error') {
+    navigator.clipboard.writeText(display.textContent);
+    showToast('Hasil berhasil disalin!');
+  }
+});
+
+clearHistoryBtn.addEventListener('click', () => {
+  history = [];
+  localStorage.removeItem('kenzo_calc_ult_history');
+  renderHistory();
+  showToast('Riwayat dibersihkan');
+});
+
+// Init
+renderHistory();
+updateUI();
+</script>
+
+</body>
+</html>
