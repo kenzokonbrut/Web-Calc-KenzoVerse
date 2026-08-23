@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KenzoVerse Phone Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg-color: #000000;
+  --btn-num: #262628;
+  --btn-num-active: #3a3a3c;
+  --btn-func: #3e3e42;
+  --btn-func-active: #545458;
+  --btn-sci: #1c1c1e;
+  --btn-sci-active: #2c2c2e;
+  --btn-orange: #ff9500;
+  --btn-orange-active: #cc7700;
+  --text-main: #ffffff;
+  --text-sub: #8e8e93;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  user-select: none;
+}
+
+body {
+  background-color: #0a0a0a;
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+}
+
+/* Mobile Frame Container */
+.phone-container {
+  background-color: var(--bg-color);
+  width: 100%;
+  max-width: 380px;
+  height: 780px;
+  border-radius: 40px;
+  padding: 20px 16px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 12px #18181b;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Top Navigation Bar */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+}
+
+.icon-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: var(--text-main);
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.icon-btn:hover { background: rgba(255, 255, 255, 0.15); }
+
+.top-pill {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  gap: 12px;
+}
+
+.pill-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-main);
+  padding: 6px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+}
+
+.pill-btn:hover { opacity: 1; }
+
+/* Display Area */
+.display-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 10px 8px 20px 8px;
+  word-break: break-all;
+}
+
+.mode-indicator {
+  align-self: flex-start;
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  font-weight: 500;
+  margin-bottom: auto;
+  padding-top: 20px;
+}
+
+.sub-display {
+  font-size: 1.1rem;
+  color: var(--text-sub);
+  min-height: 1.5rem;
+  margin-bottom: 4px;
+}
+
+.main-display {
+  font-size: 3rem;
+  font-weight: 300;
+  color: var(--text-main);
+  line-height: 1.1;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.main-display::-webkit-scrollbar { display: none; }
+
+/* Scientific Panel (Expandable) */
+.sci-panel {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 0;
+}
+
+.sci-panel.open {
+  max-height: 220px;
+  opacity: 1;
+  margin-bottom: 10px;
+}
+
+/* Keypads */
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+button.btn {
+  aspect-ratio: 1.15;
+  border-radius: 99px;
+  border: none;
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--text-main);
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.05s, background-color 0.15s;
+}
+
+button.btn:active {
+  transform: scale(0.92);
+}
+
+button.num { background-color: var(--btn-num); }
+button.num:active { background-color: var(--btn-num-active); }
+
+button.func { background-color: var(--btn-func); }
+button.func:active { background-color: var(--btn-func-active); }
+
+button.sci { 
+  background-color: var(--btn-sci); 
+  font-size: 1.05rem; 
+  aspect-ratio: 1.3;
+  border-radius: 20px;
+}
+button.sci:active { background-color: var(--btn-sci-active); }
+
+button.orange { background-color: var(--btn-orange); color: #fff; }
+button.orange:active { background-color: var(--btn-orange-active); }
+
+/* SVG Icon Inside Sci Toggle Button */
+.sci-icon {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+/* History Modal Drawer */
+.history-drawer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+.history-drawer.open {
+  transform: translateY(0);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.history-item {
+  text-align: right;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 10px;
+  cursor: pointer;
+}
+
+.history-item .expr { font-size: 0.9rem; color: var(--text-sub); }
+.history-item .res { font-size: 1.4rem; color: var(--text-main); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="phone-container">
+  
+  <!-- Top Navigation Bar -->
+  <div class="top-bar">
+    <button class="icon-btn" id="history-toggle" title="Riwayat">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+    </button>
+    <div class="top-pill">
+      <button class="pill-btn" title="Timer/History"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></button>
+      <button class="pill-btn" title="Converter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"></path><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><path d="M7 23l-4-4 4-4"></path><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg></button>
+      <button class="pill-btn" id="deg-rad-btn" title="Deg/Rad">DEG</button>
+    </div>
+  </div>
+
+  <!-- Main Display Screen -->
+  <div class="display-area">
+    <div class="mode-indicator" id="mode-text">DEG</div>
+    <div class="sub-display" id="sub-display"></div>
+    <div class="main-display" id="display">0</div>
+  </div>
+
+  <!-- Expandable Scientific Panel -->
+  <div class="sci-panel" id="sci-panel">
+    <button class="btn sci" data-value="inv">INV</button>
+    <button class="btn sci" id="deg-toggle">DEG</button>
+    <button class="btn sci" data-value="!">x!</button>
+    <button class="btn sci" data-value="(">(</button>
+    <button class="btn sci" data-value=")">)</button>
+
+    <button class="btn sci" data-value="sin">sin</button>
+    <button class="btn sci" data-value="cos">cos</button>
+    <button class="btn sci" data-value="tan">tan</button>
+    <button class="btn sci" data-value="log">log</button>
+    <button class="btn sci" data-value="ln">ln</button>
+
+    <button class="btn sci" data-value="²">x²</button>
+    <button class="btn sci" data-value="^">xʸ</button>
+    <button class="btn sci" data-value="π">π</button>
+    <button class="btn sci" data-value="e">e</button>
+    <button class="btn sci" data-value="√">√</button>
+  </div>
+
+  <!-- Standard Keypad -->
+  <div class="keypad">
+    <button class="btn func" data-value="AC">AC</button>
+    <button class="btn func" data-value="%">%</button>
+    <button class="btn func" data-value="⌫">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg>
+    </button>
+    <button class="btn func" data-value="÷">÷</button>
+
+    <button class="btn num" data-value="7">7</button>
+    <button class="btn num" data-value="8">8</button>
+    <button class="btn num" data-value="9">9</button>
+    <button class="btn func" data-value="×">×</button>
+
+    <button class="btn num" data-value="4">4</button>
+    <button class="btn num" data-value="5">5</button>
+    <button class="btn num" data-value="6">6</button>
+    <button class="btn func" data-value="-">-</button>
+
+    <button class="btn num" data-value="1">1</button>
+    <button class="btn num" data-value="2">2</button>
+    <button class="btn num" data-value="3">3</button>
+    <button class="btn func" data-value="+">+</button>
+
+    <!-- Bottom Left Scientific Mode Toggle Icon -->
+    <button class="btn num" id="sci-toggle-btn" title="Toggle Scientific">
+      <svg class="sci-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M7 9h2m-2 6h4m4-6l-2 6m2 0l-2-6"></path></svg>
+    </button>
+    <button class="btn num" data-value="0">0</button>
+    <button class="btn num" data-value=".">.</button>
+    <button class="btn orange" data-value="=">=</button>
+  </div>
+
+  <!-- History Drawer -->
+  <div class="history-drawer" id="history-drawer">
+    <div class="history-header">
+      <span style="font-weight: 600; font-size: 1.1rem;">Riwayat</span>
+      <button class="icon-btn" id="history-close">✕</button>
+    </div>
+    <div class="history-list" id="history-list"></div>
+  </div>
+
+</div>
+
+<script>
+const display = document.getElementById('display');
+const subDisplay = document.getElementById('sub-display');
+const buttons = document.querySelectorAll('button.btn');
+const sciPanel = document.getElementById('sci-panel');
+const sciToggleBtn = document.getElementById('sci-toggle-btn');
+const historyDrawer = document.getElementById('history-drawer');
+const historyToggle = document.getElementById('history-toggle');
+const historyClose = document.getElementById('history-close');
+const historyList = document.getElementById('history-list');
+const degRadBtn = document.getElementById('deg-rad-btn');
+const degToggle = document.getElementById('deg-toggle');
+const modeText = document.getElementById('mode-text');
+
+let current = '';
+let isDeg = true;
+let history = JSON.parse(localStorage.getItem('phone_calc_history')) || [];
+
+// Toggle Scientific Panel
+sciToggleBtn.addEventListener('click', () => {
+  sciPanel.classList.toggle('open');
+});
+
+// Toggle History Drawer
+historyToggle.addEventListener('click', () => historyDrawer.classList.add('open'));
+historyClose.addEventListener('click', () => historyDrawer.classList.remove('open'));
+
+// Toggle DEG / RAD
+function toggleDegRad() {
+  isDeg = !isDeg;
+  const label = isDeg ? 'DEG' : 'RAD';
+  degRadBtn.textContent = label;
+  degToggle.textContent = label;
+  modeText.textContent = label;
+}
+
+degRadBtn.addEventListener('click', toggleDegRad);
+degToggle.addEventListener('click', toggleDegRad);
+
+function updateDisplay() {
+  display.textContent = current || '0';
+}
+
+function renderHistory() {
+  if(history.length === 0) {
+    historyList.innerHTML = '<div style="color: var(--text-sub); text-align: center; margin-top: 40px;">Belum ada riwayat</div>';
+    return;
+  }
+  historyList.innerHTML = history.map((h, i) => `
+    <div class="history-item" data-index="${i}">
+      <div class="expr">${h.expr}</div>
+      <div class="res">= ${h.res}</div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.history-item').forEach(item => {
+    item.addEventListener('click', () => {
+      current = String(history[item.dataset.index].res);
+      updateDisplay();
+      historyDrawer.classList.remove('open');
+    });
+  });
+}
+
+function factorial(n) {
+  if (n < 0) return NaN;
+  if (n === 0 || n === 1) return 1;
+  let res = 1;
+  for (let i = 2; i <= n; i++) res *= i;
+  return res;
+}
+
+function calculate() {
+  if(!current) return;
+  let expr = current;
+  try {
+    let s = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/%/g, '/100');
+    s = s.replace(/π/g, 'Math.PI').replace(/e/g, 'Math.E');
+    s = s.replace(/²/g, '**2').replace(/\^/g, '**');
+    s = s.replace(/√/g, 'Math.sqrt');
+    s = s.replace(/log/g, 'Math.log10').replace(/ln/g, 'Math.log');
+    s = s.replace(/(\d+)!/g, (m, n) => `factorial(${n})`);
+
+    const rad = isDeg ? '(Math.PI/180)*' : '';
+    s = s.replace(/sin\(/g, `Math.sin(${rad}`);
+    s = s.replace(/cos\(/g, `Math.cos(${rad}`);
+    s = s.replace(/tan\(/g, `Math.tan(${rad}`);
+
+    let raw = Function('factorial', `'use strict'; return (${s})`)(factorial);
+    if(Number.isFinite(raw)) {
+      let formatted = Math.round((raw + Number.EPSILON) * 10000000) / 10000000;
+      subDisplay.textContent = `${current} =`;
+      history.unshift({ expr: current, res: formatted });
+      if(history.length > 20) history.pop();
+      localStorage.setItem('phone_calc_history', JSON.stringify(history));
+      renderHistory();
+      current = String(formatted);
+    }
+  } catch {
+    current = 'Error';
+  }
+  updateDisplay();
+}
+
+buttons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const val = btn.dataset.value;
+    if(!val) return;
+
+    if(val === 'AC') {
+      current = '';
+      subDisplay.textContent = '';
+    } else if(val === '⌫') {
+      current = current.slice(0, -1);
+    } else if(val === '=') {
+      calculate();
+    } else if(['sin', 'cos', 'tan', 'log', 'ln'].includes(val)) {
+      current += `${val}(`;
+    } else if(val === '√') {
+      current += '√(';
+    } else {
+      if(current === 'Error') current = '';
+      current += val;
+    }
+    updateDisplay();
+  });
+});
+
+renderHistory();
+</script>
+
+</body>
+</html>
